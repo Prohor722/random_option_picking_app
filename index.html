@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Picker App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7fafc;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --gradient: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            --error-color: #e53e3e;
+            --success-color: #38a169;
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --border-color: #4a5568;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: capitalize;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-pick {
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            color: white;
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .option-tag {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .remove-option {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .radio-item input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+
+        .number-input {
+            width: 80px;
+        }
+
+        .results {
+            background: var(--bg-primary);
+            border: 2px solid var(--primary-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .results.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .results h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+
+        .picked-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .picked-item {
+            background: var(--gradient);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .error {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .radio-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <button class="theme-toggle" id="themeToggle">
+        🌙 Dark Mode
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Random Picker</h1>
+            <p>Add your options and let fate decide!</p>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Add Options</h2>
+            <div class="input-group">
+                <label for="optionInput">Enter an option:</label>
+                <input type="text" id="optionInput" class="input-field" placeholder="Type your option here...">
+                <div class="error" id="optionError"></div>
+            </div>
+            <button class="btn btn-primary" id="addOptionBtn">+ Add Option</button>
+            
+            <div id="optionsDisplay" class="options-container"></div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Pick Settings</h2>
+            <div class="controls">
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="single" name="pickMode" value="single" checked>
+                        <label for="single">Single Pick</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="multiple" name="pickMode" value="multiple">
+                        <label for="multiple">Multiple Pick</label>
+                    </div>
+                </div>
+                <div id="multipleControls" style="display: none;">
+                    <label for="pickCount">Number to pick:</label>
+                    <input type="number" id="pickCount" class="input-field number-input" min="1" value="2">
+                </div>
+            </div>
+            <div class="error" id="settingsError"></div>
+            
+            <button class="btn btn-pick" id="pickBtn">🎲 Pick Random</button>
+        </div>
+
+        <div id="results" class="results">
+            <h3>Your Random Pick:</h3>
+            <div id="pickedItems" class="picked-items"></div>
+        </div>
+    </div>
+
+    <script>
+        class RandomPicker {
+            constructor() {
+                this.options = [];
+                this.initializeElements();
+                this.bindEvents();
+                this.initializeTheme();
+            }
+
+            initializeElements() {
+                this.optionInput = document.getElementById('optionInput');
+                this.addOptionBtn = document.getElementById('addOptionBtn');
+                this.optionsDisplay = document.getElementById('optionsDisplay');
+                this.pickBtn = document.getElementById('pickBtn');
+                this.results = document.getElementById('results');
+                this.pickedItems = document.getElementById('pickedItems');
+                this.optionError = document.getElementById('optionError');
+                this.settingsError = document.getElementById('settingsError');
+                this.themeToggle = document.getElementById('themeToggle');
+                this.pickCount = document.getElementById('pickCount');
+                this.multipleControls = document.getElementById('multipleControls');
+            }
+
+            bindEvents() {
+                this.addOptionBtn.addEventListener('click', () => this.addOption());
+                this.optionInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addOption();
+                });
+                this.pickBtn.addEventListener('click', () => this.pickRandom());
+                this.themeToggle.addEventListener('click', () => this.toggleTheme());
+                
+                document.querySelectorAll('input[name="pickMode"]').forEach(radio => {
+                    radio.addEventListener('change', () => this.handleModeChange());
+                });
+
+                this.pickCount.addEventListener('input', () => this.validatePickCount());
+            }
+
+            initializeTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.body.setAttribute('data-theme', savedTheme);
+                this.updateThemeToggle(savedTheme);
+            }
+
+            toggleTheme() {
+                const currentTheme = document.body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                document.body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                this.updateThemeToggle(newTheme);
+            }
+
+            updateThemeToggle(theme) {
+                this.themeToggle.innerHTML = theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+            }
+
+            addOption() {
+                const optionText = this.optionInput.value.trim();
+                
+                // Clear previous error
+                this.optionError.textContent = '';
+
+                // Validation
+                if (!optionText) {
+                    this.showError(this.optionError, 'Please enter an option');
+                    return;
+                }
+
+                if (optionText.length > 100) {
+                    this.showError(this.optionError, 'Option must be less than 100 characters');
+                    return;
+                }
+
+                if (this.options.includes(optionText)) {
+                    this.showError(this.optionError, 'This option already exists');
+                    return;
+                }
+
+                // Add option
+                this.options.push(optionText);
+                this.optionInput.value = '';
+                this.updateOptionsDisplay();
+                this.hideResults();
+            }
+
+            removeOption(index) {
+                this.options.splice(index, 1);
+                this.updateOptionsDisplay();
+                this.hideResults();
+            }
+
+            updateOptionsDisplay() {
+                if (this.options.length === 0) {
+                    this.optionsDisplay.innerHTML = '<div class="empty-state">No options added yet. Add some options to get started!</div>';
+                    return;
+                }
+
+                this.optionsDisplay.innerHTML = this.options.map((option, index) => `
+                    <div class="option-tag">
+                        ${this.escapeHtml(option)}
+                        <button class="remove-option" onclick="picker.removeOption(${index})">×</button>
+                    </div>
+                `).join('');
+            }
+
+            handleModeChange() {
+                const isMultiple = document.getElementById('multiple').checked;
+                this.multipleControls.style.display = isMultiple ? 'block' : 'none';
+                if (isMultiple) {
+                    this.validatePickCount();
+                }
+                this.hideResults();
+            }
+
+            validatePickCount() {
+                const count = parseInt(this.pickCount.value);
+                this.settingsError.textContent = '';
+
+                if (count < 1) {
+                    this.showError(this.settingsError, 'Pick count must be at least 1');
+                    return false;
+                }
+
+                if (count > this.options.length) {
+                    this.showError(this.settingsError, `Cannot pick ${count} items from ${this.options.length} options`);
+                    return false;
+                }
+
+                return true;
+            }
+
+            pickRandom() {
+                // Clear previous errors
+                this.settingsError.textContent = '';
+
+                // Validation
+                if (this.options.length === 0) {
+                    this.showError(this.settingsError, 'Please add at least one option');
+                    return;
+                }
+
+                const isSingle = document.getElementById('single').checked;
+                let picked = [];
+
+                if (isSingle) {
+                    const randomIndex = Math.floor(Math.random() * this.options.length);
+                    picked = [this.options[randomIndex]];
+                } else {
+                    if (!this.validatePickCount()) return;
+                    
+                    const count = parseInt(this.pickCount.value);
+                    const shuffled = [...this.options].sort(() => 0.5 - Math.random());
+                    picked = shuffled.slice(0, count);
+                }
+
+                this.displayResults(picked);
+            }
+
+            displayResults(picked) {
+                this.pickedItems.innerHTML = picked.map(item => `
+                    <div class="picked-item">${this.escapeHtml(item)}</div>
+                `).join('');
+
+                this.results.classList.add('show');
+                this.results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            hideResults() {
+                this.results.classList.remove('show');
+            }
+
+            showError(element, message) {
+                element.textContent = message;
+                element.style.animation = 'none';
+                setTimeout(() => {
+                    element.style.animation = 'slideIn 0.3s ease';
+                }, 10);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize the app
+        const picker = new RandomPicker();
+    </script>
+</body>
+</html>
